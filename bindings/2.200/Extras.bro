@@ -9,6 +9,11 @@ class DynamicScrollDelegate {
 
 }
 
+class GJPointDouble {
+    double x;
+    double y;
+}
+
 class FMODSound {
     
 }
