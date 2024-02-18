@@ -144,9 +144,9 @@ class cocos2d::CCNode {
 	void resumeSchedulerAndActions() = mac 0x251c40;
 	cocos2d::CCAction* runAction(cocos2d::CCAction*) = mac 0x251f90;
 	void schedule(cocos2d::SEL_SCHEDULE);
-	void schedule(cocos2d::SEL_SCHEDULE, float);
-	void schedule(cocos2d::SEL_SCHEDULE, float, unsigned int, float) = mac 0x252220;
-	void scheduleOnce(cocos2d::SEL_SCHEDULE, float);
+	void schedule(cocos2d::SEL_SCHEDULE, float) = mac 0x252220;
+	void schedule(cocos2d::SEL_SCHEDULE, float, unsigned int, float) = mac 0x252250;
+	void scheduleOnce(cocos2d::SEL_SCHEDULE, float) = mac 0x2521f0;
 	void scheduleUpdate() = mac 0x2520a0;
 	void scheduleUpdateWithPriority(int);
 	void scheduleUpdateWithPriorityLua(int, int);
@@ -344,6 +344,7 @@ class cocos2d::CCScene {
 
 	// CCScene(cocos2d::CCScene const&);
 	// CCScene();
+	~CCScene() = mac 0x26ebc0;
 
 	virtual bool init() = mac 0x26ebf0;
 }
@@ -591,7 +592,7 @@ class cocos2d::CCTextureCache {
 	// CCTextureCache();
 	cocos2d::CCTexture2D* addETCImage(char const*);
 	cocos2d::CCTexture2D* addImage(char const*, bool) = mac 0x5b2630;
-	void addImageAsync(char const*, cocos2d::CCObject*, cocos2d::SEL_MenuHandler, int, cocos2d::CCTexture2DPixelFormat);
+	void addImageAsync(char const*, cocos2d::CCObject*, cocos2d::SEL_MenuHandler, int, cocos2d::CCTexture2DPixelFormat) = mac 0x5b18d0;
 	void addImageAsyncCallBack(float);
 	cocos2d::CCTexture2D* addPVRImage(char const*);
 	cocos2d::CCTexture2D* addUIImage(cocos2d::CCImage*, char const*);
@@ -604,7 +605,7 @@ class cocos2d::CCTextureCache {
 	void removeTextureForKey(char const*) = mac 0x5b38d0;
 	void removeUnusedTextures();
 	cocos2d::CCDictionary* snapshotTextures();
-	cocos2d::CCTexture2D* textureForKey(char const*);
+	cocos2d::CCTexture2D* textureForKey(char const*) = mac 0x5b3950;
 }
 
 [[link(win, android)]]
@@ -961,7 +962,7 @@ class cocos2d::CCRotateBy {
 [[link(win, android)]]
 class cocos2d::CCScaleTo {
 	static cocos2d::CCScaleTo* create(float, float) = mac 0x397f90;
-	static cocos2d::CCScaleTo* create(float, float, float);
+	static cocos2d::CCScaleTo* create(float, float, float) = mac 0x398090;
 
 	bool initWithDuration(float, float);
 	bool initWithDuration(float, float, float);
@@ -1611,6 +1612,26 @@ class cocos2d::CCTransitionFade {
 	virtual void onExit();
 	virtual bool initWithDuration(float, cocos2d::CCScene*);
 	virtual bool initWithDuration(float, cocos2d::CCScene*, cocos2d::_ccColor3B const&);
+}
+
+[[link(win, android)]]
+class cocos2d::CCTransitionScene {
+	static cocos2d::CCTransitionScene* create(float, cocos2d::CCScene*);
+
+	void setNewScene(float);
+
+	// CCTransitionScene(cocos2d::CCTransitionScene const&);
+	// CCTransitionScene();
+	~CCTransitionScene() = mac 0xd0620;
+	void finish();
+	void hideOutShowIn();
+
+	virtual void onEnter() = mac 0xd0a90;
+	virtual void onExit() = mac 0xd0ae0;
+	virtual void cleanup() = mac 0xd0b40;
+	virtual void draw() = mac 0xd0840;
+	virtual bool initWithDuration(float, cocos2d::CCScene*) = mac 0xd07a0;
+	virtual void sceneOrder() = mac 0xd0830;
 }
 
 

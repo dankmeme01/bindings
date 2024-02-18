@@ -137,6 +137,14 @@ class ButtonSprite : cocos2d::CCSprite {
 	TodoReturn updateBGImage(char const*) = win 0x20230, mac 0x8cdd0;
 	TodoReturn updateSpriteBGSize();
 	TodoReturn updateSpriteOffset(cocos2d::CCPoint) = mac 0x8cef0;
+
+    PAD = mac 0x18, win 0x18;
+    cocos2d::CCLabelBMFont* m_label;
+    cocos2d::CCSprite* m_subSprite;
+    cocos2d::CCSprite* m_subBGSprite;
+    cocos2d::extension::CCScale9Sprite* m_BGSprite;
+    PAD = mac 0xC, win 0x8;
+    cocos2d::CCPoint m_spritePosition;
 }
 
 [[link(android)]]
@@ -930,7 +938,7 @@ class LoadingLayer : cocos2d::CCLayer {
 
 	void loadAssets() = win 0x272390, mac 0x380ba0;
 	TodoReturn updateProgress(int);
-	void loadingFinished() = win 0x2722A0;
+	void loadingFinished() = win 0x2722A0, mac 0x368f60;
 
 	// 2.2, not tested
 
@@ -1576,16 +1584,16 @@ class GJBaseGameLayer : cocos2d::CCLayer, TriggerEffectDelegate {
 	PlayerObject* m_player1;
 	PlayerObject* m_player2;
 	LevelSettingsObject* m_levelSettings;
-	PAD = win 0x134, android32 0x134, android64 0x21c, mac 0x1c4;
-	cocos2d::CCLayer* m_objectLayer; //probs completely wrong on mac
-	PAD = win 0x70, android32 0x70, android64 0xec, mac 0xec;
+	PAD = win 0x134, android32 0x134, android64 0x21c, mac 0x1fc;
+	cocos2d::CCLayer* m_objectLayer;
+	PAD = win 0x70, android32 0x70, android64 0xec, mac 0xb4;
 	std::array<float, 2000> m_massiveFloatArray;
 	PAD = win 0x110, android32 0x114, android64 0x1ec, mac 0x1a4;
 	bool m_isPracticeMode;
 	bool m_practiceMusicSync;
-	PAD = win 0xd2, android32 0xba, android64 0xf0;
+	PAD = win 0xd2, android32 0xba, android64 0xf0, mac 0x100;
 	gd::vector<PlayerButtonCommand> m_queuedButtons; 
-	PAD = win 0x20a, android32 0x1ea, android64 0x340;
+	PAD = win 0x20a, android32 0x1ea, android64 0x340, mac 0x320;
 }
 
 [[link(android)]]
@@ -1797,7 +1805,9 @@ class GameManager : GManager {
 	TodoReturn addToGJLog(cocos2d::CCString*);
 	TodoReturn clearGJLog();
 	TodoReturn joinReddit();
-	TodoReturn keyForIcon(int, int);
+	int keyForIcon(int iconIdx, int iconEnum) {
+		return m_keyStartForIcon->at(iconEnum) + iconIdx - 1;
+	}
 	void loadGround(int) = mac 0x360e10;
 	TodoReturn printGJLog();
 	void reloadMenu() = win 0x12c510;
@@ -1872,7 +1882,7 @@ class GameManager : GManager {
 	TodoReturn resetAchievement(gd::string);
 	TodoReturn resetCoinUnlocks();
 	void resolutionForKey(int) = win 0x12c8e0;
-	TodoReturn sheetNameForIcon(int, int);
+	gd::string sheetNameForIcon(int, int) = mac 0x35ec30;
 	TodoReturn showInterstitial();
 	TodoReturn switchScreenMode(bool, bool);
 	TodoReturn unloadBackground();
@@ -1947,7 +1957,7 @@ class GameManager : GManager {
 	TodoReturn iconKey(int, IconType);
 	TodoReturn colorKey(int, UnlockType);
 	TodoReturn loadFont(int);
-	TodoReturn loadIcon(int, int, int) = win 0x125630, mac 0x35f7a0;
+	cocos2d::CCTexture2D* loadIcon(int, int, int) = win 0x125630, mac 0x35f7a0;
 	TodoReturn lockIcon(int, IconType);
 	TodoReturn rateGame();
 	TodoReturn lockColor(int, UnlockType);
@@ -1998,9 +2008,7 @@ class GameManager : GManager {
 	gd::string m_playerUDID;
 	gd::string m_playerName;
 	bool m_commentsEnabled;
-	int m_playerUserID_a;
-	int m_playerUserID_b;
-	int m_playerUserID;
+	geode::SeedValueRSV m_playerUserID;
 	float m_bgVolume;
 	float m_sfxVolume;
 	float m_timeOffset;
@@ -2097,11 +2105,11 @@ class GameManager : GManager {
 	int m_customPracticeSongID;
 	gd::map<int, int> m_loadIcon;
 	gd::map<int, gd::map<int, int>> m_loadIcon2;
-	gd::map<int, bool> m_probablyIsIconLoaded;
-	void* m_somethingIconAndTypeForKey;
+	gd::map<int, bool> m_isIconBeingLoaded;
+	std::array<int, 9>* m_keyStartForIcon;
 	void* m_somethingKeyForIcon;
 	void* m_idk;
-	gd::map<int, cocos2d::CCObject*> m_iconDelegates;
+	gd::map<int, gd::vector<cocos2d::CCObject*>> m_iconDelegates;
 	int m_iconRequestID;
 	cocos2d::CCArray* m_unkArray;
 	void* m_someAdPointer;
@@ -3488,148 +3496,7 @@ class GameObject : CCSpritePlus {
 	virtual TodoReturn getType() const = mac 0x1d2ad0;
 	virtual void setType(GameObjectType) = mac 0x1d2ae0;
 
-	PAD = android32 0xf, win 0xf;
-
-	// property 511
-	bool m_hasExtendedCollision;
-	PAD = android32 0x13, win 0x13;
-
-	cocos2d::CCSprite* m_baseSprite;
-    cocos2d::CCSprite* m_detailSprite;
-
-	PAD = android32 0x64, win 0x64;
-
-	gd::string m_particleString;
-
-	PAD = android32 0x1, win 0x1;
-
-	// property 146
-	bool m_particleUseObjectColor;
-	PAD = android32 0x3e, win 0x32;
-
-	// property 108
-	int m_linkedGroup;
-	PAD = android32 0x23, win 0x23;
-
-	int m_uniqueID;
-	GameObjectType m_objectType;
-
-	PAD = android32 0x14, win 0x14;
-	double m_realXPosition;
-	double m_realYPosition;
-	cocos2d::CCPoint m_startPosition;
-	PAD = android32 0x1, win 0x1;
-
-	// property 372
-	bool m_hasNoAudioScale;
-	PAD = android32 0x2a, win 0x2a;
-
-	// property 343
-	short m_enterChannel;
-	// property 446
-	short m_objectMaterial;
-	PAD = android32 0x4, win 0x4;
-
-	// property 96
-	bool m_hasNoGlow;
-
-	// property 23
-	int m_targetColor;
-
-	// property 1
-	int m_objectID;
-	PAD = android32 0x8, win 0x8;
-
-	// property 497
-	short m_customColorType;
-	// property 67
-	bool m_isDontEnter;
-	// property 64
-	bool m_isDontFade;
-	// property 116
-	bool m_hasNoEffects;
-	// property 507
-	bool m_hasNoParticles;
-	PAD = android32 0x16, win 0x16;
-
-	// property 53
-	int m_property53;
-	PAD = android32 0x18, win 0x18;
-
-	// property 21, also used with 41 and 43
-	GJSpriteColor* m_baseColor;
-	// property 22, also used with 42 and 44
-    GJSpriteColor* m_detailColor;
-	PAD = android32 0xc;
-
-	// property 24
-	ZLayer m_zLayer;
-	// property 25
-	int m_zOrder;
-	PAD = android32 0x10, win 0x10;
-
-	bool m_shouldUpdateColorSprite; // m_shouldUpdateColorSprite
-	PAD = android32 0x1, win 0x1;
-
-	// property 34
-	bool m_hasGroupParent;
-	// property 279
-	bool m_hasAreaParent;
-	// property 128
-	float m_scaleX;
-	// property 129
-	float m_scaleY;
-	
-	// property 57
-	std::array<short, 10>* m_groups;
-	// used with property 57
-	short m_groupCount;
-	// used with property 274
-	bool m_hasGroupParentsString;
-	PAD = android32 0xf, win 0xf;
-
-	// property 20
-	short m_editorLayer;
-	// property 61
-	short m_editorLayer2;
-	PAD = android32 0x8, win 0x8;
-
-	// property 121
-	bool m_isNoTouch;
-	PAD = android32 0x2c, win 0x2c;
-
-	// property 103
-	bool m_isHighDetail;
-	PAD = android32 0x11, win 0x11;
-
-	// property 134
-	bool m_isPassable;
-	// property 135
-	bool m_isHide;
-	// property 136
-	bool m_isNonStickX;
-	// property 289
-	bool m_isNonStickY;
-	// property 137
-	bool m_isIceBlock;
-	// property 193
-	bool m_isGripSlope;
-	// property 356
-	bool m_isScaleStick;
-	// property 495
-	bool m_isExtraSticky;
-	// property 496
-	bool m_isDontBoostY;
-	// property 509
-	bool m_isDontBoostX;
-	PAD = android32 0x11, win 0x11;
-
-	// property 155
-	int m_property155;
-	// property 156
-	int m_property156;
-
-	PAD = android32 0x12, win 0x26; // TODO: yeah someone pls fix windows pads
+	PAD = mac 0x308;
 }
 
 [[link(android)]]
@@ -4182,7 +4049,7 @@ class GameLevelManager : cocos2d::CCNode {
 	TodoReturn getGJRewards(int) = mac 0x525ff0;
 	TodoReturn getIntForKey(char const*) = mac 0x527ee0;
 	TodoReturn getLengthStr(bool, bool, bool, bool, bool, bool);
-	TodoReturn getMainLevel(int, bool) = win 0xF40E0, mac 0x5011a0;
+	GJGameLevel* getMainLevel(int, bool) = win 0xF40E0, mac 0x5011a0;
 	TodoReturn getReportKey(int);
 	bool getBoolForKey(char const*) = mac 0x5280b0, win 0x110820;
 	gd::string getCommentKey(int, int, int, CommentKeyType) = mac 0x51e1d0;
@@ -4396,7 +4263,7 @@ class GameLevelManager : cocos2d::CCNode {
 	TodoReturn suggestLevelStars(int, int, int);
 	TodoReturn updateDescription(int, gd::string);
 	TodoReturn updateLevelOrders() = win 0xF68D0;
-	TodoReturn uploadUserMessage(int, gd::string, gd::string);
+	TodoReturn uploadUserMessage(int, gd::string, gd::string) = mac 0x51ce90;
 	gd::string userNameForUserID(int) = mac 0x503170, win 0xF5610;
 	TodoReturn accountIDForUserID(int) = mac 0x5037f0;
 	TodoReturn areGauntletsLoaded() = mac 0x514460;
@@ -4405,7 +4272,7 @@ class GameLevelManager : cocos2d::CCNode {
 	TodoReturn createAndGetScores(gd::string, GJScoreType) = mac 0x507520;
 	TodoReturn createNewLevelList() = mac 0x502340;
 	TodoReturn deleteLevelComment(int, int);
-	TodoReturn deleteUserMessages(GJUserMessage*, cocos2d::CCArray*, bool);
+	TodoReturn deleteUserMessages(GJUserMessage*, cocos2d::CCArray*, bool) = mac 0x51d450;
 	TodoReturn hasDownloadedLevel(int);
 	TodoReturn hasRatedLevelStars(int) = mac 0x516a60;
 	TodoReturn invalidateMessages(bool, bool) = mac 0x51d940, win 0x106ad0;
@@ -4534,7 +4401,7 @@ class GameLevelManager : cocos2d::CCNode {
 	LevelListDeleteDelegate* m_levelListDeleteDelegate;
 	UserInfoDelegate* m_userInfoDelegate;
 	void* m_unkDelegate;
-	/*UserListDelegate* m_userListDelegate;
+	UserListDelegate* m_userListDelegate;
 	FriendRequestDelegate* m_friendRequestDelegate;
 	MessageListDelegate* m_messageListDelegate;
 	DownloadMessageDelegate* m_downloadMessageDelegate;
@@ -4546,7 +4413,7 @@ class GameLevelManager : cocos2d::CCNode {
 	int m_unkDownload;
 	PAD = win 0x4;
 	gd::string m_unkStr3;
-	cocos2d::CCString* m_unkStr4;*/
+	cocos2d::CCString* m_unkStr4;
 }
 
 [[link(android)]]
@@ -6375,7 +6242,7 @@ class CurrencyRewardDelegate {
 
 [[link(android)]]
 class PlayLayer : GJBaseGameLayer, CCCircleWaveDelegate, CurrencyRewardDelegate, DialogDelegate {
-	static PlayLayer* create(GJGameLevel*, bool, bool) = win 0x2D68F0;
+	static PlayLayer* create(GJGameLevel*, bool, bool) = win 0x2D68F0, mac 0xa5d30;
 
 	static PlayLayer* get() {
 		return GameManager::get()->m_playLayer;
@@ -6387,10 +6254,10 @@ class PlayLayer : GJBaseGameLayer, CCCircleWaveDelegate, CurrencyRewardDelegate,
 	TodoReturn getEndPosition();
 	TodoReturn getRelativeMod(cocos2d::CCPoint, float, float, float);
 	TodoReturn getTempMilliTime();
-	TodoReturn getCurrentPercent();
+	float getCurrentPercent() = mac 0xb3970;
 	TodoReturn getLastCheckpoint() = win 0x2e3000;
 	TodoReturn getRelativeModNew(cocos2d::CCPoint, float, float, bool, bool);
-	TodoReturn getCurrentPercentInt() = win 0x2e09e0;
+	int getCurrentPercentInt() = win 0x2e09e0;
 
 	void onQuit() = win 0x2e5650, mac 0xad390;
 
@@ -6508,7 +6375,10 @@ class PlayLayer : GJBaseGameLayer, CCCircleWaveDelegate, CurrencyRewardDelegate,
 	virtual TodoReturn circleWaveWillBeRemoved(CCCircleWave*);
 	virtual void dialogClosed(DialogLayer*) = win 0x2e12b0;
 
-	PAD = win 0x1ec, android32 0x1ec, android64 0x2c4;
+	// those are all wrong except for mac
+	PAD = win 0x1ec, android32 0x1ec, android64 0x2c4, mac 0x138;
+	cocos2d::CCSprite* m_progressBar;
+	PAD = mac 0x178;
 }
 
 
@@ -6700,7 +6570,7 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	TodoReturn updateSlopeRotation(float);
 	TodoReturn enablePlayerControls();
 	TodoReturn playDynamicSpiderRun() = mac 0x3e3400;
-	TodoReturn playSpiderDashEffect(cocos2d::CCPoint, cocos2d::CCPoint);
+	TodoReturn playSpiderDashEffect(cocos2d::CCPoint, cocos2d::CCPoint) = mac 0x3ef720;
 	TodoReturn resetCollisionValues();
 	TodoReturn rotateGameplayObject(GameObject*);
 	TodoReturn togglePlatformerMode(bool) = mac 0x3de0b0;
@@ -6712,7 +6582,7 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	TodoReturn animatePlatformerJump(float);
 	TodoReturn checkSnapJumpToObject(GameObject*);
 	TodoReturn disablePlayerControls();
-	TodoReturn enableCustomGlowColor(cocos2d::_ccColor3B const&);
+	TodoReturn enableCustomGlowColor(cocos2d::_ccColor3B const&) = mac 0x3fa900;
 	TodoReturn playerIsFallingBugged();
 	TodoReturn rotatePreSlopeObjects();
 	TodoReturn updateInternalActions(float);
@@ -6721,17 +6591,19 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	TodoReturn updatePlayerRollFrame(int) = win 0x2D1990, mac 0x3f90f0;
 	TodoReturn updatePlayerShipFrame(int) = win 0x2D13F0, mac 0x3f7180;
 	TodoReturn updateShipSpriteExtra(gd::string) = win 0x2D1FD0, mac 0x3dd4b0;
-	TodoReturn disableCustomGlowColor();
+	TodoReturn disableCustomGlowColor() {
+		m_hasCustomGlowColor = false;
+	}
 	TodoReturn removePlacedCheckpoint();
 	TodoReturn spiderTestJumpInternal(bool);
 	TodoReturn unrotateGameplayObject(GameObject*);
 	TodoReturn updateLastGroundObject(GameObject*);
-	TodoReturn updatePlayerRobotFrame(int);
+	TodoReturn updatePlayerRobotFrame(int) = mac 0x3fb000;
 	TodoReturn updatePlayerSwingFrame(int) = win 0x2D1B50, mac 0x3f8300;
 	TodoReturn createFadeOutDartStreak();
 	TodoReturn removePendingCheckpoint() = win 0x2d46d0;
 	TodoReturn unrotatePreSlopeObjects();
-	TodoReturn updatePlayerSpiderFrame(int);
+	TodoReturn updatePlayerSpiderFrame(int) = mac 0x3fb020;
 	TodoReturn updatePlayerSpriteExtra(gd::string) = win 0x2D1ED0;
 	TodoReturn convertToClosestRotation(float);
 	TodoReturn updatePlayerJetpackFrame(int) = win 0x2D15B0, mac 0x3f73b0;
@@ -6773,26 +6645,26 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	virtual TodoReturn animationFinished(char const*) = mac 0x3fd190;
 
 	cocos2d::CCNode* m_unk49c;
-	PAD = win 0x44;
+	PAD = win 0x44, mac 0x18;
 	cocos2d::CCNode* m_unk4e4;
 	cocos2d::CCDictionary* m_unk4e8;
 	cocos2d::CCDictionary* m_unk4ec;
 	cocos2d::CCDictionary* m_unk4f0;
 	cocos2d::CCDictionary* m_unk4f4;
-	PAD = win 0x20;
+	PAD = win 0x20, mac 0x20;
 	float m_unk518;
-	PAD = win 0x8;
+	PAD = win 0x8, mac 0x8;
 	GameObject* m_collidedObject;
-	PAD = win 0x40;
+	PAD = win 0x40, mac 0x50;
 	float m_unk568;
 	cocos2d::CCSprite* m_unk56c;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	GameObject* m_unk574;
 	GameObject* m_unk578;
-	PAD = win 0x8;
+	PAD = win 0x8, mac 0x0;
 	float unk_584;
 	int unk_588; // seems to always be 0, but when you respawn it's -1 until you move at least 1 block from the respawn place
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	cocos2d::CCArray* m_particleSystems;
 	gd::unordered_map<int, GJPointDouble> m_unk594; // insertions are in PlayerObject::rotateGameplayObject
 	gd::unordered_map<int, GameObject*> m_unk5b4;
@@ -6819,13 +6691,13 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	PlayerFireBoostSprite* m_swingFireTop;
 	cocos2d::CCSprite* m_unk61c;
 	cocos2d::CCMotionStreak* m_regularTrail;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x8;
 	HardStreak* m_waveTrail;
 	float m_unk62c;
-	PAD = win 0x14;
+	PAD = win 0x14, mac 0x14;
 	float m_unk644;
 	float m_unk648;
-	PAD = win 0xc;
+	PAD = win 0xc, mac 0xc;
 	bool m_unk658;
 	bool m_unk659;
 	bool m_unk65a;
@@ -6834,22 +6706,22 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	bool m_unk65d; // walking ???
 	bool m_unk65e;
 	bool m_unk65f;
-	PAD = win 0x28;
+	PAD = win 0x28, mac 0x28;
 	float m_unk688;
 	float m_unk68c;
-	PAD = win 0x12;
+	PAD = win 0x12, mac 0x12;
 	bool m_unk6a2; // = GameManager::getGameVariable("0096")
 	bool m_unk6a3; // = GameManager::getGameVariable("0100")
-	PAD = win 0x8;
+	PAD = win 0x8, mac 0x10;
 	float m_unk6ac;
-	PAD = win 0xc;
+	PAD = win 0xc, mac 0xc;
 	float m_unk6bc;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	GameObject* m_objectSnappedTo;
-	PAD = win 0x8;
+	PAD = win 0x8, mac 0x8;
 	GJRobotSprite* m_robotSprite;
 	GJSpiderSprite* m_spiderSprite;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	cocos2d::CCParticleSystemQuad* m_unk6dc;
 	cocos2d::CCParticleSystemQuad* m_unk6e0;
 	cocos2d::CCParticleSystemQuad* m_unk6e4;
@@ -6859,17 +6731,17 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	cocos2d::CCParticleSystemQuad* m_unk6f4;
 	cocos2d::CCParticleSystemQuad* m_unk6f8;
 	cocos2d::CCParticleSystemQuad* m_unk6fc;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	cocos2d::CCParticleSystemQuad* m_unk704;
 	cocos2d::CCParticleSystemQuad* m_unk708;
-	PAD = win 0x6c;
+	PAD = win 0x6c, mac 0x68;
 	bool m_hasCustomGlowColor;
 	cocos2d::ccColor3B m_glowColor;
-	PAD = win 0x1c;
+	PAD = win 0x1c, mac 0x1c;
 	double m_yVelocity;
 	bool m_isOnSlope;
 	bool m_wasOnSlope;
-	PAD = win 0x7;
+	PAD = win 0x7, mac 0x7;
 	bool m_isShip;
 	bool m_isBird;
 	bool m_isBall;
@@ -6882,19 +6754,19 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	bool m_isGoingLeft;
 	bool m_unk7b3;
 	bool m_isSwing;
-	PAD = win 0x10;
+	PAD = win 0x10, mac 0x10;
 	float m_unk7c8;
 	float m_unk7cc; // unsure if float
 	float m_unk7d0;
 	bool m_isDashing;
-	PAD = win 0x8;
+	PAD = win 0x8, mac 0x8;
 	float m_vehicleSize;
 	float m_playerSpeed;
 	cocos2d::CCPoint m_unk7e8;
 	cocos2d::CCPoint m_unk7f0; // maybe m_lastPortalPos
-	PAD = win 0x7;
+	PAD = win 0x7, mac 0x7;
 	bool m_isLocked;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	cocos2d::CCPoint m_lastGroundedPos;
 	cocos2d::CCArray* m_touchingRings;
 	GameObject* m_lastActivatedPortal;
@@ -6903,43 +6775,45 @@ class PlayerObject : GameObject, AnimatedSpriteDelegate {
 	cocos2d::ccColor3B m_playerColor1;
 	cocos2d::ccColor3B m_playerColor2;
 	cocos2d::CCPoint m_position;
-	PAD = win 0x14;
+	PAD = win 0x14, mac 0x14;
 	float m_unk838;
 	gd::unordered_map<int, int> m_unk83c; // the types are placeholders, no idea what they should be
-	PAD = win 0x8c;
+	PAD = mac 0x20;
+	double m_platformerXVelocity;
+	PAD = win 0x8c, mac 0x70;
 	bool m_isPlatformer;
 	int m_unk8ec;
 	int m_unk8f0;
 	int m_unk8f4;
 	int m_unk8f8;
 	float m_gravityMod;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	cocos2d::CCPoint m_unk904;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	gd::map<int, bool> m_unk910;
 	float m_unk918; // increments whenever you're midiar?
 	float m_unk91c;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	gd::map<int, bool> m_unk924;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	gd::string m_unk930; // this is always "run" ???
 	bool m_unk948; // = getGameVariable("0123")
-	PAD = win 0x7;
+	PAD = win 0x7, mac 0x7;
 	cocos2d::CCSpriteBatchNode* m_unk950;
 	cocos2d::CCSpriteBatchNode* m_unk954;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	PlayerFireBoostSprite* m_robotFire;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	PlayLayer* m_playLayer;
 	cocos2d::CCLayer* m_parentLayer;
 	GJActionManager* m_actionManager;
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 	float m_unk974;
 	bool m_unk978;
 	bool m_unk979; // = isItemEnabled(0xc, 0x12);
 	bool m_unk97a; // = isItemEnabled(0xc, 0x13);
 	bool m_unk97b; // = isItemEnabled(0xc, 0x14);
-	PAD = win 0x4;
+	PAD = win 0x4, mac 0x4;
 }
 
 
@@ -9676,11 +9550,13 @@ class GJSongBrowser : GJDropDownLayer, FLAlertLayerProtocol, TableViewCellDelega
 [[link(android)]]
 class GJUserMessage : cocos2d::CCNode {
 	static GJUserMessage* create(cocos2d::CCDictionary*);
-	static GJUserMessage* create();
+	static GJUserMessage* create() = mac 0x52d230;
 
 	~GJUserMessage();
 
 	virtual bool init();
+
+	int m_messageID;
 }
 
 [[link(android)]]
@@ -10821,8 +10697,8 @@ class FMODAudioState {
 
 [[link(android)]]
 class FMODLevelVisualizer : cocos2d::CCNode {
-	TodoReturn updateVisualizer(float, float, float);
-	static FMODLevelVisualizer* create();
+	TodoReturn updateVisualizer(float, float, float) = mac 0x28c6e0;
+	static FMODLevelVisualizer* create() = mac 0x28c230;
 	~FMODLevelVisualizer();
 
 	virtual bool init();
@@ -14021,11 +13897,24 @@ class PlayerFireBoostSprite : cocos2d::CCSprite {
 
 	~PlayerFireBoostSprite();
 
-	TodoReturn animateFireIn();
-	TodoReturn animateFireOut();
-	TodoReturn loopFireAnimation();
+	void animateFireIn() {
+		this->stopAllActions();
+
+		auto scaleto = cocos2d::CCScaleTo::create(0.06f, m_someFloat * 0.6f, m_someFloat * 1.5f);
+		auto callfunc = cocos2d::CCCallFunc::create(this, callfunc_selector(PlayerFireBoostSprite::loopFireAnimation));
+		auto sequence = cocos2d::CCSequence::create(scaleto, callfunc, nullptr);
+		this->runAction(sequence);
+	}
+	void animateFireOut() {
+		this->stopAllActions();
+		auto action = cocos2d::CCScaleTo::create(0.4f, 0.01f, 0.01f);
+		this->runAction(action);
+	}
+	TodoReturn loopFireAnimation() = mac 0x3f8530;
 
 	virtual bool init();
+
+	float m_someFloat;
 }
 
 [[link(android)]]
