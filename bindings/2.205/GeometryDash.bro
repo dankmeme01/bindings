@@ -853,7 +853,7 @@ class CCMenuItemSpriteExtra : cocos2d::CCMenuItemSprite {
 	bool init(cocos2d::CCNode*, cocos2d::CCNode*, cocos2d::CCObject*, cocos2d::SEL_MenuHandler);
 	inline void setSizeMult(float mult) {
 		//inlined on windows, member is in CCMenuItemSprite
-		m_scaleMultiplier = mult;
+		m_fSizeMult = mult;
 	}
 	TodoReturn useAnimationType(MenuAnimationType);
 
@@ -1277,15 +1277,21 @@ class CCURLObject : cocos2d::CCObject {
 	bool init(gd::string, gd::string);
 }
 
-[[link(android)]]
+[[link(android), depends(ChallengesPage), depends(GJChallengeItem)]]
 class ChallengeNode : cocos2d::CCNode {
 	// virtual ~ChallengeNode();
 
-	static ChallengeNode* create(GJChallengeItem*, ChallengesPage*, bool);
+	static ChallengeNode* create(GJChallengeItem* challengeItem, ChallengesPage* challengesPage, bool isNew);
 
-	bool init(GJChallengeItem*, ChallengesPage*, bool);
+	bool init(GJChallengeItem* challengeItem, ChallengesPage* challengesPage, bool isNew);
 	void onClaimReward(cocos2d::CCObject* sender);
-	TodoReturn updateTimeLabel(gd::string);
+	void updateTimeLabel(gd::string);
+
+	ChallengesPage* m_challengesPage;
+	GJChallengeItem* m_challengeItem;
+	cocos2d::CCPoint m_unkPoint;
+	cocos2d::CCLabelBMFont* m_countdownLabel;
+	bool m_unloaded;
 }
 
 [[link(android)]]
@@ -1295,7 +1301,7 @@ class ChallengesPage : FLAlertLayer, FLAlertLayerProtocol, GJChallengeDelegate, 
 	static ChallengesPage* create();
 
 	TodoReturn claimItem(ChallengeNode*, GJChallengeItem*, cocos2d::CCPoint);
-	TodoReturn createChallengeNode(int, bool, float, bool);
+	ChallengeNode* createChallengeNode(int number, bool skipAnimation, float animLength, bool isNew);
 	TodoReturn exitNodeAtSlot(int, float);
 	void onClose(cocos2d::CCObject* sender);
 	TodoReturn tryGetChallenges();
@@ -1310,6 +1316,14 @@ class ChallengesPage : FLAlertLayer, FLAlertLayerProtocol, GJChallengeDelegate, 
 	virtual TodoReturn challengeStatusFinished();
 	virtual TodoReturn challengeStatusFailed();
 	virtual TodoReturn currencyWillExit(CurrencyRewardLayer*);
+
+	cocos2d::CCArray* m_dots;
+	cocos2d::CCLabelBMFont* m_countdownLabel;
+	LoadingCircle* m_circle;
+	bool m_triedToLoad;
+	bool m_unkBool;
+	CurrencySpriteType m_currencySpriteType;
+	cocos2d::CCDictionary* m_challengeNodes;
 }
 
 [[link(android)]]
@@ -1971,6 +1985,7 @@ class CustomizeObjectLayer : FLAlertLayer, TextInputDelegate, HSVWidgetDelegate,
     cocos2d::extension::CCScale9Sprite* m_customColorInputBG;
     ColorChannelSprite* m_colorSprite;
     CCMenuItemSpriteExtra* m_colorSpriteButton;
+    CCMenuItemSpriteExtra* m_liveSelectButton;
     bool m_showTextInput;
     bool m_customColorSelected;
 }
@@ -3597,9 +3612,9 @@ class FMODAudioEngine : cocos2d::CCNode {
 	TodoReturn fadeOutMusic(float, int);
 	TodoReturn getActiveMusic(int);
 	TodoReturn getActiveMusicChannel(int);
-	TodoReturn getBackgroundMusicVolume();
+	float getBackgroundMusicVolume();
 	TodoReturn getChannelGroup(int, bool);
-	TodoReturn getEffectsVolume();
+	float getEffectsVolume();
 	TodoReturn getFMODStatus(int);
 	TodoReturn getMeteringValue();
 	TodoReturn getMusicChannelID(int);
@@ -4477,10 +4492,9 @@ class GameManager : GManager {
 	TodoReturn queueReloadMenu();
 	TodoReturn rateGame();
 	TodoReturn recountUserStats(gd::string);
-	void reloadAll(bool, bool, bool, bool);
-	void reloadAll(bool a, bool b, bool c) {
-		// TODO: figure out these args i have no idea
-		return this->reloadAll(a, b, c, false);
+	void reloadAll(bool switchModes, bool toFullscreen, bool borderless, bool unused);
+	void reloadAll(bool switchModes, bool toFullscreen, bool unused) {
+		return this->reloadAll(switchModes, toFullscreen, false, unused);
 	}
 	TodoReturn reloadAllStep2();
 	TodoReturn reloadAllStep3();
@@ -5244,7 +5258,7 @@ class GameStatsManager : cocos2d::CCNode {
 	int getBaseCurrencyForLevel(GJGameLevel*);
 	TodoReturn getBaseDiamonds(int);
 	TodoReturn getBonusDiamonds(int);
-	TodoReturn getChallenge(int);
+	GJChallengeItem* getChallenge(int);
 	TodoReturn getChallengeKey(GJChallengeItem*);
 	int getCollectedCoinsForLevel(GJGameLevel*);
 	TodoReturn getCompletedMapPacks();
@@ -5261,12 +5275,12 @@ class GameStatsManager : cocos2d::CCNode {
 	TodoReturn getMapPackKey(int);
 	TodoReturn getNextVideoAdReward();
 	TodoReturn getPathRewardKey(int);
-	TodoReturn getQueuedChallenge(int);
+	GJChallengeItem* getQueuedChallenge(int);
 	TodoReturn getRewardForSecretChest(int);
 	TodoReturn getRewardForSpecialChest(gd::string);
 	TodoReturn getRewardItem(GJRewardType);
 	TodoReturn getRewardKey(GJRewardType, int);
-	TodoReturn getSecondaryQueuedChallenge(int);
+	GJChallengeItem* getSecondaryQueuedChallenge(int);
 	TodoReturn getSecretChestForItem(int, UnlockType);
 	TodoReturn getSecretCoinKey(char const*);
 	TodoReturn getSpecialChestKeyForItem(int, UnlockType);
@@ -5445,7 +5459,7 @@ class GameToolbox {
 	static TodoReturn getMultipliedHSV(cocos2d::ccHSVValue const&, float);
 	static TodoReturn getRelativeOffset(GameObject*, cocos2d::CCPoint);
 	static TodoReturn getResponse(cocos2d::extension::CCHttpResponse*);
-	static TodoReturn getTimeString(int);
+	static gd::string getTimeString(int);
 	static TodoReturn hsvFromString(gd::string const&, char const*);
 	static TodoReturn intToShortString(int);
 	static TodoReturn intToString(int);
@@ -5501,7 +5515,7 @@ class GauntletNode : cocos2d::CCNode {
 
 	TodoReturn frameForType(GauntletType);
 	bool init(GJMapPack*);
-	TodoReturn nameForType(GauntletType);
+	static gd::string nameForType(GauntletType);
 	TodoReturn onClaimReward();
 }
 
@@ -6554,9 +6568,8 @@ class GJFriendRequest : cocos2d::CCNode {
 [[link(android)]]
 class GJGameLevel : cocos2d::CCNode {
 	// virtual ~GJGameLevel();
-
 	static GJGameLevel* create();
-	static GJGameLevel* create(cocos2d::CCDictionary*, bool);
+	static GJGameLevel* create(cocos2d::CCDictionary* dict, bool hasPassword);
 	inline static GJGameLevel* createWithCoder(DS_Dictionary* dict) {
 		//inlined on windows
 		auto level = GJGameLevel::create();
@@ -6564,53 +6577,53 @@ class GJGameLevel : cocos2d::CCNode {
 		return level;
 	}
 
-	TodoReturn areCoinsVerified();
-	TodoReturn copyLevelInfo(GJGameLevel*);
-	void dataLoaded(DS_Dictionary*);
-	TodoReturn demonIconForDifficulty(DemonDifficultyType);
-	TodoReturn generateSettingsString();
+	bool areCoinsVerified();
+	void copyLevelInfo(GJGameLevel* levelInfo);
+	void dataLoaded(DS_Dictionary* );
+	static int demonIconForDifficulty(DemonDifficultyType);
+	gd::string generateSettingsString();
 	gd::string getAudioFileName();
 	TodoReturn getAverageDifficulty();
 	char const* getCoinKey(int);
-	TodoReturn getLastBuildPageForTab(int);
-	TodoReturn getLengthKey(int, bool);
-	TodoReturn getListSnapshot();
-	TodoReturn getNormalPercent();
+	int getLastBuildPageForTab(int page);
+	int getLengthKey(int, bool);
+	GJGameLevel* getListSnapshot();
+	int getNormalPercent();
 	TodoReturn getSongName();
 	gd::string getUnpackedLevelDescription();
 	TodoReturn handleStatsConflict(GJGameLevel*);
 	inline bool isPlatformer() {
 		return m_levelLength == 5;
 	}
-	TodoReturn lengthKeyToString(int);
-	TodoReturn levelWasAltered();
-	TodoReturn levelWasSubmitted();
-	TodoReturn parseSettingsString(gd::string);
-	TodoReturn saveNewScore(int, int);
+	const char* lengthKeyToString(int);
+	void levelWasAltered();
+	void levelWasSubmitted();
+	void parseSettingsString(gd::string settings);
+	void saveNewScore(int newTime, int newPoints);
 	TodoReturn savePercentage(int, bool, int, int, bool);
 	TodoReturn scoreStringToVector(gd::string&, gd::vector<int>&);
 	TodoReturn scoreVectorToString(gd::vector<int>&, int);
-	void setAccountID(int);
-	void setAttempts(int);
-	void setAttemptTime(int);
-	void setClicks(int);
-	void setCoinsVerified(int);
-	void setDailyID(int);
-	void setDemon(int);
-	void setJumps(int);
+	void setAccountID(int accountID);
+	void setAttempts(int attempts);
+	void setAttemptTime(int attemptTime);
+	void setClicks(int clicks);
+	void setCoinsVerified(int coinsVerified);
+	void setDailyID(int dailyID);
+	void setDemon(int demon);
+	void setJumps(int jumps);
 	void setLastBuildPageForTab(int, int);
-	void setLevelID(int);
-	void setNewNormalPercent(int);
-	void setNewNormalPercent2(int);
-	void setNormalPercent(int);
-	void setObjectCount(int);
-	void setOriginalLevel(int);
-	void setStars(int);
-	TodoReturn shouldCheatReset();
+	void setLevelID(int levelID);
+	void setNewNormalPercent(int newNormalPercent);
+	void setNewNormalPercent2(int newNormalPercent2);
+	void setNormalPercent(int normalPercent);
+	void setObjectCount(int objectCount);
+	void setOriginalLevel(int copiedID);
+	void setStars(int stars);
+	bool shouldCheatReset();
 	TodoReturn storeNewLocalScore(int, int);
-	TodoReturn unverifyCoins();
+	void unverifyCoins();
 
-	virtual void encodeWithCoder(DS_Dictionary*);
+	virtual void encodeWithCoder(DS_Dictionary* dsdict);
 	virtual bool canEncode(); //merged func (return true)
 	virtual bool init();
 
@@ -7358,7 +7371,7 @@ class GJPathsLayer : FLAlertLayer, FLAlertLayerProtocol {
 	static GJPathsLayer* create();
 
 	TodoReturn darkenButtons(bool);
-	TodoReturn nameForPath(int);
+	static gd::string nameForPath(int);
 	void onClose(cocos2d::CCObject* sender);
 	void onPath(cocos2d::CCObject* sender);
 
@@ -7661,11 +7674,11 @@ class GJSearchObject : cocos2d::CCNode {
 	static GJSearchObject* createFromKey(char const* key);
 
 	char const* getKey();
-	TodoReturn getNextPageKey();
-	TodoReturn getNextPageObject();
-	TodoReturn getPageObject(int page);
-	TodoReturn getPrevPageObject();
-	TodoReturn getSearchKey(SearchType searchType, gd::string searchQuery, gd::string difficulty, gd::string length, int page, bool star, bool uncompleted, bool featured, int songID, bool original, bool twoPlayer, bool customSong, bool songFilter, bool noStar, bool coins, bool epic, bool legendary, bool mythic, bool onlyCompleted, int demonFilter, int folder, int searchMode);
+	const char* getNextPageKey();
+	GJSearchObject *getNextPageObject();
+	GJSearchObject *getPageObject(int page);
+	GJSearchObject *getPrevPageObject();
+	const char * getSearchKey(SearchType searchType, gd::string searchQuery, gd::string difficulty, gd::string length, int page, bool star, bool uncompleted, bool featured, int songID, bool original, bool twoPlayer, bool customSong, bool songFilter, bool noStar, bool coins, bool epic, bool legendary, bool mythic, bool onlyCompleted, int demonFilter, int folder, int searchMode);
 	bool init(SearchType searchType, gd::string searchQuery, gd::string difficulty, gd::string length, int page, bool star, bool uncompleted, bool featured, int songID, bool original, bool twoPlayer, bool customSong, bool songFilter, bool noStar, bool coins, bool epic, bool legendary, bool mythic, bool onlyCompleted, int demonFilter, int folder, int searchMode);
 	bool isLevelSearchObject();
 
